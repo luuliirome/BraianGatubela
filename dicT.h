@@ -254,6 +254,18 @@ aed2::Conj<string> dicT<T>::claves() {
 	return res;
 }
 
+template <typename T>
+bool dicT<T>::operator ==(const dicT<T> &otro) const{
+	bool res;
+	typename Conj<string>::Iterador it = otro.claves().CrearIt();
+	while(it.HaySiguiente()){
+		if(!definido(it.Siguiente())) return false;
+		if(otro.obtener(it.Siguiente()) != this.obtener(it.Siguiente())) return false;
+		it.Avanzar();
+	}
+	return true;
+}
+
 
 
 
