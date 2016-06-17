@@ -17,7 +17,7 @@ public:
 	///////////////////////////
 	dicT();  				//definida
 	///////////////////////////
-	dicT(const dicT<T> &otro);//definida
+	dicT(const dicT<T> &otro);  // falta definir
 	///////////////////////////
 	~dicT();  				//definida
 	///////////////////////////
@@ -197,7 +197,7 @@ dicT<T>::~dicT(){
 template <typename T>
 bool dicT<T>::esVacio()const {
 	int i=0;
-	while(i<27){
+	while(i<256){
 		if(raiz->hijos[i]!=NULL) return false;
 		i++;
 	}
