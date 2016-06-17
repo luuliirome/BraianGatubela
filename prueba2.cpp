@@ -4,8 +4,10 @@
 using namespace std;
 
 int main(){
-	int a=4;
-	delete (&a);
+	string a="hola";
+	cout << a<< endl;
+	a.clear();
+	cout << a << endl;
 
 	return 0;
 }

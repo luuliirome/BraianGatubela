@@ -15,13 +15,13 @@ class dicT
 public:
 	class Iterador;
 	///////////////////////////
-	dicT();  //definida
+	dicT();  				//definida
 	///////////////////////////
 	dicT(const dicT<T> &otro);//definida
 	///////////////////////////
-	~dicT();  //definida
+	~dicT();  				//definida
 	///////////////////////////
-	bool esVacio() const;  //definida
+	bool esVacio() const;  	//definida
 	///////////////////////////
 	void definir(string clave, T& elem);  //definida
 	///////////////////////////
@@ -33,13 +33,13 @@ public:
 	///////////////////////////
 	aed2::Conj<string> claves();  //definida
 	///////////////////////////
-	Iterador CrearIt();  //definida
+	Iterador CrearIt();  
 	///////////////////////////
-	bool operator ==(const dicT<T> &otro) const;  //definida
+	bool operator ==( dicT<T> &otro) ;  //definida
 	///////////////////////////
-	string Minimo(); //definida
+	string Minimo(); 		//definida
 	///////////////////////////
-	string Maximo(); //definida
+	string Maximo(); 		//definida
 	///////////////////////////
 
 
@@ -57,8 +57,15 @@ public:
 		///////////////////////////
 		void Avanzar();
 	private:
+		Iterador(dicT<T>* d): dic(d){
+			claves= (*d).claves();
+			typename Conj<string>::Iterador it = claves.CrearIt();
+			siguiente=make_pair(it.Siguiente(), (*d).obtener(it.Siguiente()));
+			it.EliminarSiguiente();
+		}
+		friend typename dicT<T>::Iterador dicT<T>::CrearIt();
 
-		pair<string, T> Siguiente;
+		pair<string, T> siguiente;
 		aed2::Conj<string> claves;
 		dicT<T>* dic;
 	};
@@ -288,12 +295,13 @@ aed2::Conj<string> dicT<T>::claves() {
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 template <typename T>
-bool dicT<T>::operator ==(const dicT<T> &otro) const{
+bool dicT<T>::operator ==(dicT<T> &otro) {
 	bool res;
-	typename Conj<string>::Iterador it = otro.claves().CrearIt();
+	Conj<string> clavesOtro= otro.claves();
+	typename Conj<string>::Iterador it = clavesOtro.CrearIt();
 	while(it.HaySiguiente()){
 		if(!definido(it.Siguiente())) return false;
-		if(otro.obtener(it.Siguiente()) != this.obtener(it.Siguiente())) return false;
+		if(otro.obtener(it.Siguiente()) != obtener(it.Siguiente())) return false;
 		it.Avanzar();
 	}
 	return true;
@@ -340,6 +348,61 @@ string dicT<T>::Maximo(){
 	}
 	return DameNombre(actual);
 }
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename T>
+typename dicT<T>::Iterador dicT<T>::CrearIt(){
+	return Iterador(this);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+//FUNCIONES ITERADOR
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 
+
+
+template<typename T>
+dicT<T>::Iterador::Iterador()
+	: dic(NULL)
+{}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename T>
+dicT<T>::Iterador::Iterador(const typename dicT<T>::Iterador& otro)
+	: dic(otro.dic), claves(otro.claves), siguiente(otro.siguiente)
+{}	
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename T>
+bool dicT<T>::Iterador::HaySiguiente() const{
+	return (siguiente.first.size()!=0);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename T>
+string  dicT<T>::Iterador::SiguienteClave(){
+	return (siguiente.first);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename T>
+T& dicT<T>::Iterador::SiguienteSignificado(){
+	return (siguiente.second);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename T>
+void dicT<T>::Iterador::Avanzar(){
+	typename Conj<string>::Iterador it = claves.CrearIt();
+	if(!it.HaySiguiente()){
+		siguiente.first.clear();
+	}
+	else{
+	siguiente.first=it.Siguiente();
+	siguiente.second=(*dic).obtener(it.Siguiente());
+	it.EliminarSiguiente();
+	}	
+}
 
 #endif
