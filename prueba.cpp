@@ -23,7 +23,25 @@ int main(){
 	a.definir(x, *num);
 	assert(a.definido(x) ==1);
 	assert(a.obtener(x) ==4174);
-	//asdfasdfjk
+	int* num2= new int(5093);
+	string y="casa";
+	a.definir(y, *num2);
+	int* num3=new int(4541);
+	a.definir("superfragilisticoespiralidoso", *num3);
+
+
+	/*Conj<string> cla= a.claves();
+	typename Conj<string>::Iterador it=cla.CrearIt();
+	while(it.HaySiguiente()){
+		cout << it.Siguiente()<< endl;
+		it.Avanzar();
+	}*/
+	cout << "Hijo mas chico es : " << a.Minimo()<<endl;
+	cout << "Hijo mas grande es: "<< a.Maximo()<< endl;
+
+
+
+
 	//a.borrar(x);
 	/*typename Conj<string>::Iterador it= a.claves().CrearIt();
 	while(it.HaySiguiente()){

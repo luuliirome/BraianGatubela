@@ -14,20 +14,33 @@ class dicT
 {
 public:
 	class Iterador;
-
-	dicT();
-	dicT(const dicT<T> &otro);
-	~dicT();
-	bool esVacio() const;
-	void definir(string clave, T& elem);
-	bool definido(string clave) const;
-	T& obtener(string clave) const;
-	void borrar(string clave);
-
-	 aed2::Conj<string> claves() ;
-
-	Iterador CrearIt();
-	bool operator ==(const dicT<T> &otro) const;
+	///////////////////////////
+	dicT();  //definida
+	///////////////////////////
+	dicT(const dicT<T> &otro);//definida
+	///////////////////////////
+	~dicT();  //definida
+	///////////////////////////
+	bool esVacio() const;  //definida
+	///////////////////////////
+	void definir(string clave, T& elem);  //definida
+	///////////////////////////
+	bool definido(string clave) const;  //definida
+	///////////////////////////
+	T& obtener(string clave) const;  //definida
+	///////////////////////////
+	void borrar(string clave);  //definida
+	///////////////////////////
+	aed2::Conj<string> claves();  //definida
+	///////////////////////////
+	Iterador CrearIt();  //definida
+	///////////////////////////
+	bool operator ==(const dicT<T> &otro) const;  //definida
+	///////////////////////////
+	string Minimo();
+	///////////////////////////
+	string Maximo();
+	///////////////////////////
 
 
 	class Iterador{
@@ -72,7 +85,7 @@ private:
 	};
 
 	Nodo* raiz;
-
+	////////////////////////////////////////////////////////////////////////////////
 	template <typename K>
 	void apilarHijos(Nodo* actual, pila<K>& recoridos){
 		for(int i=255;i>=0;i--){
@@ -80,6 +93,7 @@ private:
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////
 	Lista<Nodo*> hijos(Nodo* actual){
 		Lista<Nodo*> res;
 		int i=0;
@@ -90,6 +104,7 @@ private:
 		return res;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////
 	bool EsVaciaHijos(Nodo* actual){
 		bool res=true;
 		int i=0;
@@ -101,9 +116,11 @@ private:
 
 	}
 
+	////////////////////////////////////////////////////////////////////////////////
 	bool esPalabra(Nodo* actual){
 		return (actual->significado!=NULL);
 	}
+	////////////////////////////////////////////////////////////////////////////////
 	string DameNombre(Nodo* n){
 		Nodo* actual= n;
 		string res;
@@ -115,6 +132,7 @@ private:
 		}
 		return res;
 	}
+	////////////////////////////////////////////////////////////////////////////////
 	void destruir(Nodo* actual){
 		if(actual!=NULL){
 			if(esPalabra(actual)) delete(actual->significado);
@@ -123,6 +141,35 @@ private:
 			delete(actual);
 		}
 	}
+	////////////////////////////////////////////////////////////////////////////////
+	bool tieneUnHijosMasChico(Nodo* n){
+		int i=0;
+		Nodo* actual=NULL;
+		
+		while(actual==NULL && i<256){
+			actual=n->hijos[i];
+			i++;
+		}
+		if(actual==NULL) return false;
+		else if(actual->letra < n->letra)return true;
+		else return false;
+		
+	}	
+	////////////////////////////////////////////////////////////////////////////////
+	bool tieneUnHijosMasGrande(Nodo* n){
+		int i=255;
+		Nodo* actual=NULL;
+		
+		while(actual==NULL && i>=0){
+			actual=n->hijos[i];
+			i--;
+		}
+		if(actual==NULL) return false;
+		else if(actual->letra < n->letra)return true;
+		else return false;
+		
+	}	
+
 	
 
 };
@@ -229,28 +276,19 @@ aed2::Conj<string> dicT<T>::claves() {
 	pila<Nodo> recorridos;
 	apilarHijos(actual, recorridos);
 	Conj<string> res;
-
+	int contador=0;
 	while(!(recorridos.EsVacia())){
 		actual = &recorridos.tope();
 		recorridos.desapilar();
-		
+
 		if(! EsVaciaHijos(actual)) apilarHijos(actual, recorridos);
 		if(esPalabra(actual)){
 			string* aux= new string(DameNombre(actual)); ///ANDA DAME NOMBRE ! :D
-
 			res.AgregarRapido(*aux); //aca hay problema	
 		}
-		
+
 	}
-
-	//ACA PASA ALGO AL DEVOLVER, HAST ESTE PUNTO RES TIENE UN ELEMENTO Y FUNCIONA BIEN!
-	//CONSUTAR
-	///////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////	
-	///////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////
-
-
+	
 	return res;
 }
 
@@ -265,6 +303,49 @@ bool dicT<T>::operator ==(const dicT<T> &otro) const{
 	}
 	return true;
 }
+
+template <typename T>
+string dicT<T>::Minimo(){
+	Nodo* actual=NULL; // para q entre en el primer while
+	int i=0;
+	while(actual==NULL){
+		actual = raiz->hijos[i];
+		i++;
+	}
+
+	while(tieneUnHijosMasChico(actual) || !esPalabra(actual)){
+		Nodo* aux=NULL;
+		i=0;
+		while(aux==NULL){
+			aux=actual->hijos[i];
+			i++;
+		}
+		actual=aux;
+	}
+	return DameNombre(actual);
+}
+
+template <typename T>
+string dicT<T>::Maximo(){
+	Nodo* actual=NULL; // para q entre en el primer while
+	int i=255;
+	while(actual==NULL){
+		actual = raiz->hijos[i];
+		i--;
+	}
+
+	while(tieneUnHijosMasGrande(actual) || !esPalabra(actual)){
+		Nodo* aux=NULL;
+		i=255;
+		while(aux==NULL){
+			aux=actual->hijos[i];
+			i--;
+		}
+		actual=aux;
+	}
+	return DameNombre(actual);
+}
+
 
 
 
