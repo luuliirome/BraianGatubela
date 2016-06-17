@@ -37,20 +37,24 @@ public:
 	///////////////////////////
 	bool operator ==(const dicT<T> &otro) const;  //definida
 	///////////////////////////
-	string Minimo();
+	string Minimo(); //definida
 	///////////////////////////
-	string Maximo();
+	string Maximo(); //definida
 	///////////////////////////
 
 
 	class Iterador{
 	public:
 		Iterador();
-
-        Iterador(const typename dicT<T>::Iterador& otra);
+        ///////////////////////////
+		Iterador(const typename dicT<T>::Iterador& otra);
+		///////////////////////////
 		bool HaySiguiente() const;
+		///////////////////////////
 		string  SiguienteClave();
+		///////////////////////////
 		T& SiguienteSignificado();
+		///////////////////////////
 		void Avanzar();
 	private:
 
@@ -67,8 +71,6 @@ private:
 		Nodo(char c, Nodo* p) :  letra(c), padre(p){
 			ponerTodoEnNull(hijos);
 		} 
-		//averiguar si puedo hacer una copia del elemento sin tener q si o si crear un nodo
-		// solucion altenra a este problme es crear un nodo copiando el elemento y  poner el significado de ese nodo en el elemento
 		Nodo(char c, Nodo* p, T& elem ): significado(&elem), letra(c), padre(p){
 			ponerTodoEnNull(hijos);
 		} 
@@ -86,14 +88,18 @@ private:
 
 	Nodo* raiz;
 	////////////////////////////////////////////////////////////////////////////////
+	//FUNCIONES AUXILIARES PRIVADAS
+	////////////////////////////////////////////////////////////////////////////////
+	
+	// Se utiliza en Claves()
 	template <typename K>
 	void apilarHijos(Nodo* actual, pila<K>& recoridos){
 		for(int i=255;i>=0;i--){
 			if(actual->hijos[i]!=NULL)recoridos.apilar(*actual->hijos[i]);
 		}
 	}
-
 	////////////////////////////////////////////////////////////////////////////////
+	//No se utiliza por ahora...
 	Lista<Nodo*> hijos(Nodo* actual){
 		Lista<Nodo*> res;
 		int i=0;
@@ -103,8 +109,8 @@ private:
 		}
 		return res;
 	}
-
 	////////////////////////////////////////////////////////////////////////////////
+	//Se utiliza en borrar() y en Claves() devuelve true si no tiene hijos el nodo Actual
 	bool EsVaciaHijos(Nodo* actual){
 		bool res=true;
 		int i=0;
@@ -112,15 +118,14 @@ private:
 			if(actual->hijos[i]!=NULL) return false;
 			i++;
 		}
-		return true;
-
-	}
-
+		return true;}
 	////////////////////////////////////////////////////////////////////////////////
+	//se utiliza en claves(), en Minimo(), y en Maximo() devuelve si el puntero a significado es != Null
 	bool esPalabra(Nodo* actual){
 		return (actual->significado!=NULL);
 	}
 	////////////////////////////////////////////////////////////////////////////////
+	//Se utiliza en Claves(), en Minimo(), y en Maximo() Devuelve la palabra que se forma hasta n
 	string DameNombre(Nodo* n){
 		Nodo* actual= n;
 		string res;
@@ -133,19 +138,18 @@ private:
 		return res;
 	}
 	////////////////////////////////////////////////////////////////////////////////
+	//Se utiliza en el destructor, desturye todos los nodos desde actual, asi abajo
 	void destruir(Nodo* actual){
 		if(actual!=NULL){
-			if(esPalabra(actual)) delete(actual->significado);
 			for(int i=0; i<255;i++) destruir(actual->hijos[i]);
-			
 			delete(actual);
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////
+	//Se utiliza en  Minimo() devuelve si tiene un Hijo menor que  n
 	bool tieneUnHijosMasChico(Nodo* n){
 		int i=0;
 		Nodo* actual=NULL;
-		
 		while(actual==NULL && i<256){
 			actual=n->hijos[i];
 			i++;
@@ -153,13 +157,12 @@ private:
 		if(actual==NULL) return false;
 		else if(actual->letra < n->letra)return true;
 		else return false;
-		
 	}	
 	////////////////////////////////////////////////////////////////////////////////
+	// Se utiliza en Maximo()
 	bool tieneUnHijosMasGrande(Nodo* n){
 		int i=255;
 		Nodo* actual=NULL;
-		
 		while(actual==NULL && i>=0){
 			actual=n->hijos[i];
 			i--;
@@ -167,24 +170,23 @@ private:
 		if(actual==NULL) return false;
 		else if(actual->letra < n->letra)return true;
 		else return false;
-		
 	}	
-
-	
-
 };
-
+///////////////////////////////////////////////////////////
+//ALGORITMOS FUNCIONES INTERFAZ
+///////////////////////////////////////////////////////////
 template <typename T>
 dicT<T>::dicT(){
 	raiz= new Nodo();
-
 }
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template <typename T>
 dicT<T>::~dicT(){
 	destruir(raiz);
-	
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template <typename T>
 bool dicT<T>::esVacio()const {
 	int i=0;
@@ -194,7 +196,8 @@ bool dicT<T>::esVacio()const {
 	}
 	return true;
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename T>
 void dicT<T>::definir(string clave, T& elem){
 	Nodo* actual = raiz;
@@ -208,12 +211,10 @@ void dicT<T>::definir(string clave, T& elem){
 		}
 		i++;
 	}	
-	// version bizzarra d como copiar un elementeo... preguntar!
-	Nodo* aux = new Nodo('a', NULL, elem);
-	actual->significado= aux->significado;
-	delete aux;
+	actual->significado= &elem;
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template <typename T>
 bool dicT<T>::definido(string clave) const{
 	Nodo* actual = raiz;
@@ -227,7 +228,8 @@ bool dicT<T>::definido(string clave) const{
 	}
 	else return false;
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename T>
 T& dicT<T>::obtener(string clave) const{
 	Nodo* actual = raiz;
@@ -239,37 +241,32 @@ T& dicT<T>::obtener(string clave) const{
 	}	
 	return *(actual->significado);
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename T>
 void dicT<T>::borrar(string s){
 	Nodo* actual= raiz;
 	int i=0;
 	int tamanio=s.size();
-	
-
-
 	pila<Nodo> recorridos;
 	while(i<tamanio){
 		recorridos.apilar(*actual);
 		actual= actual -> hijos[s[i]];
-		
 		i++;
 	}
 	recorridos.apilar(*actual);
-	delete(actual->significado);
 	while(recorridos.size()>1){
 		actual=&recorridos.tope();
 		recorridos.desapilar();
-		
-		if(EsVaciaHijos(actual)){// por alguna razon estoy no esta devolviendo bien y me deja lagos de memoria
+		if(EsVaciaHijos(actual)){
 			int aux= actual->letra;
 			recorridos.tope().hijos[aux]=0;
 			delete(actual);
-			
 		}
 	}
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename T>
 aed2::Conj<string> dicT<T>::claves() {
 	Nodo* actual= raiz;
@@ -280,18 +277,16 @@ aed2::Conj<string> dicT<T>::claves() {
 	while(!(recorridos.EsVacia())){
 		actual = &recorridos.tope();
 		recorridos.desapilar();
-
 		if(! EsVaciaHijos(actual)) apilarHijos(actual, recorridos);
 		if(esPalabra(actual)){
-			string* aux= new string(DameNombre(actual)); ///ANDA DAME NOMBRE ! :D
-			res.AgregarRapido(*aux); //aca hay problema	
+			string aux= DameNombre(actual); ///ANDA DAME NOMBRE ! :D
+			res.AgregarRapido(aux); 	
 		}
-
-	}
-	
+	}	
 	return res;
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template <typename T>
 bool dicT<T>::operator ==(const dicT<T> &otro) const{
 	bool res;
@@ -303,7 +298,8 @@ bool dicT<T>::operator ==(const dicT<T> &otro) const{
 	}
 	return true;
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template <typename T>
 string dicT<T>::Minimo(){
 	Nodo* actual=NULL; // para q entre en el primer while
@@ -312,7 +308,6 @@ string dicT<T>::Minimo(){
 		actual = raiz->hijos[i];
 		i++;
 	}
-
 	while(tieneUnHijosMasChico(actual) || !esPalabra(actual)){
 		Nodo* aux=NULL;
 		i=0;
@@ -324,7 +319,8 @@ string dicT<T>::Minimo(){
 	}
 	return DameNombre(actual);
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template <typename T>
 string dicT<T>::Maximo(){
 	Nodo* actual=NULL; // para q entre en el primer while
@@ -333,7 +329,6 @@ string dicT<T>::Maximo(){
 		actual = raiz->hijos[i];
 		i--;
 	}
-
 	while(tieneUnHijosMasGrande(actual) || !esPalabra(actual)){
 		Nodo* aux=NULL;
 		i=255;
@@ -345,10 +340,6 @@ string dicT<T>::Maximo(){
 	}
 	return DameNombre(actual);
 }
-
-
-
-
 
 
 #endif
