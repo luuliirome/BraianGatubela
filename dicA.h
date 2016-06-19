@@ -25,7 +25,7 @@ public:
 	///////////////////////////
 	dicA();  				//definida
 	///////////////////////////
-	dicA(const dicA<K,T> &otro);//definida
+	dicA(const dicA<K,T> &otro);// 
 	///////////////////////////
 	~dicA();  				//definida
 	///////////////////////////
@@ -37,36 +37,47 @@ public:
 	///////////////////////////
 	T& obtener(K clave);  //definida
 	///////////////////////////
-	void borrar(K clave);  //definida  FALTTA CASO QUE BORRES LA RAIZ;
+	void borrar(K clave);  //definida  
 	///////////////////////////
 	aed2::Conj<K> claves();  //definida
 	///////////////////////////
 	Iterador CrearIt();  
 	///////////////////////////
-	bool operator ==( dicA<K,T> &otro) ;  //definida
+	bool operator ==( const dicA<K,T> &otro) ;  //definida
 	///////////////////////////
-	string Minimo(); 		//definida
+	K Minimo(); 		//definida
 	///////////////////////////
-	string Maximo(); 		//definida
+	K Maximo(); 		//definida
 	///////////////////////////
-	void mostrarNodos();
+	
 	class Iterador{
 	public:
 		Iterador();
         ///////////////////////////
 		Iterador(const typename dicA<K,T>::Iterador& otra);
 		///////////////////////////
-		bool HaySiguiente() const;
+		bool HaySiguiente();
 		///////////////////////////
-		string  SiguienteClave();
+		K  SiguienteClave();
 		///////////////////////////
 		T& SiguienteSignificado();
 		///////////////////////////
 		void Avanzar();
 	private:
-		Nodo* siguente;
+		Iterador(dicA<K,T>* d, Nodo* raiz): dic(d){
+			siguiente = raiz;
+			apilarHijos(siguiente, camino);
+		}
+		friend typename dicA<K,T>::Iterador dicA<K,T>::CrearIt(); 
+
+		Nodo* siguiente;
 		pila<Nodo> camino;
 		dicA<K,T>* dic;
+		//AUXILAR QUE SE UTILIZA EN AVANZAR
+		void apilarHijos(Nodo* n, pila<Nodo>& p){
+		if(n->der!=NULL)p.apilar(*(n->der));
+		if(n->izq!=NULL)p.apilar(*(n->izq));
+		}
 	};
 private:
 	
@@ -79,30 +90,39 @@ private:
 		if(n->izq!=NULL) destruir(n->izq);
 		if(n!=NULL)delete(n);
 	}
-	//////////////////////
+	/////////////////////////////////////////////
+	//Se utiliza en borrar, devuelve en actual el nodo con la clave c
 	void dameNodo(Nodo*& actual, K c){
 		while(actual->clave != c){
 			if(c > actual->clave) actual = actual->der;
 			else actual=actual->izq;
 		}
 	}
-
+	/////////////////////////////////////////////
+	// Se utiliza en borrar, devuelve si es hoja
 	bool esHoja(Nodo* n){
 		return( n->izq==NULL && n->der==NULL);
 	}
-
+	/////////////////////////////////////////////
+	// Se utiliza en borrar
 	bool tieneUnHijo(Nodo* n){
 		bool res = (n->izq==NULL && n->der!=NULL);
 		res= (res || (n->izq!=NULL && n->der ==NULL));
 		return res;
 	}
+	/////////////////////////////////////////////
+	// No se utiliza
 	bool tieneDosHijos(Nodo* n){
 		return (n->izq != NULL && n->der != NULL);
 	}
+	/////////////////////////////////////////////
 	// pre: que tenga padre;
+	//Se utiliza en borrar
 	bool esHijoDer(Nodo* n){
 		return (n->clave > n->padre->clave);
 	}
+	/////////////////////////////////////////////
+	// Se utiliza en borrar, devuelve el nodo por el que voy a remplazar a n que quiero borrar.
 	Nodo* predecesorInmediato(Nodo* n){
 		Nodo* res=n->izq;
 		while(res->der!=NULL){
@@ -110,7 +130,8 @@ private:
 		}
 		return res;
 	}
-	
+	/////////////////////////////////////////////
+	// Se utiliza en borrar, es para acortar el codigo de borrar...
 	void borrarRaiz(Nodo*& n){
 		if(esHoja(n)) {
 			delete(n);
@@ -123,7 +144,6 @@ private:
 			raiz->padre=NULL;
 		}
 		else{
-	
 		Nodo* predecesor = predecesorInmediato(n);
 		n->clave=predecesor->clave;
 		n->significado=predecesor->significado;
@@ -161,28 +181,32 @@ private:
 		}
 	}
 }
-
-	void mostrarNodosAux(Nodo* n){
-		cout << n->clave << endl;
-		if(n->izq!=NULL) mostrarNodosAux(n->izq);
-		if(n->der!=NULL) mostrarNodosAux(n->der);
+	/////////////////////////////////////////////
+	// Se utiliza en Claves
+	void apilarHijos(Nodo* n, pila<Nodo>& p){
+		if(n->der!=NULL)p.apilar(*(n->der));
+		if(n->izq!=NULL)p.apilar(*(n->izq));
 	}
-
-
 };
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 dicA<K,T>::dicA(): raiz(NULL)
 {}
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 dicA<K,T>::~dicA(){
 	destruir(raiz);
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 bool dicA<K,T>::esVacio() const{
 	return (raiz==NULL);
 }
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 void dicA<K,T>::definir(K c, T& elem){
 	if(raiz==NULL)raiz=new Nodo(c, elem, NULL);
@@ -202,7 +226,8 @@ void dicA<K,T>::definir(K c, T& elem){
 		}
 	}
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 bool dicA<K, T>::definido(K c) const{
 	Nodo* actual=raiz;
@@ -217,7 +242,8 @@ bool dicA<K, T>::definido(K c) const{
 	}
 	return false;
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 T& dicA<K,T>::obtener(K c){
 	Nodo* actual=raiz;
@@ -227,15 +253,14 @@ T& dicA<K,T>::obtener(K c){
 	}
 	return *(actual->significado);
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
 void dicA<K,T>::borrar(K c){
 	Nodo* actual= raiz;
 	dameNodo(actual, c);
 	Nodo* padre = actual->padre;
-	
 	if(actual==raiz) borrarRaiz(actual);
-
 	else if(esHoja(actual)){
 		if(esHijoDer(actual)) padre->der=NULL;
 		else padre->izq=NULL;
@@ -256,7 +281,6 @@ void dicA<K,T>::borrar(K c){
 		else{
 			if(actual->der!=NULL){
 				padre->izq=actual->der;
-
 				actual->der->padre= padre;	
 			}
 			else {
@@ -305,10 +329,100 @@ void dicA<K,T>::borrar(K c){
 		}
 	}
 }
-
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 template<typename K, typename T>
-void dicA<K,T>::mostrarNodos(){
-	mostrarNodosAux(raiz);
+Conj<K> dicA<K,T>::claves(){
+	Conj<K> res;
+	pila<Nodo> p;
+	Nodo* actual=raiz;
+	if(actual!=NULL){
+		apilarHijos(actual,p);
+		res.AgregarRapido(actual->clave);
+		while(!(p.EsVacia())){
+			actual= &p.tope();
+			p.desapilar();
+			res.AgregarRapido(actual->clave);
+			apilarHijos(actual, p);
+		}
+	}
+	return res;
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+K dicA<K,T>::Minimo(){
+	Nodo* actual=raiz;
+	while(actual->izq!=NULL) actual=actual->izq;
+	return (actual->clave);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+K dicA<K,T>::Maximo(){
+	Nodo*actual = raiz;
+	while(actual->der!=NULL)actual=actual->der;
+	return (actual->clave);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+bool dicA<K,T>::operator==(const dicA<K,T>& otro){
+	Conj<string> clavesOtro= otro.claves();
+	typename Conj<string>::Iterador it = clavesOtro.CrearIt();
+	while(it.HaySiguiente()){
+		if(!definido(it.Siguiente())) return false;
+		if(otro.obtener(it.Siguiente()) != obtener(it.Siguiente())) return false;
+		it.Avanzar();
+	}
+	return true;
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+typename dicA<K,T>::Iterador dicA<K,T>::CrearIt(){
+	return Iterador(this, raiz);
+}
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+//FUNCIONES ITERADOR DICA
+///////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+dicA<K,T>::Iterador::Iterador()
+	: siguiente(NULL), dic(NULL)
+{}
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+dicA<K,T>::Iterador::Iterador(const dicA<K,T>::Iterador& otro){
+	siguiente=otro.siguiente;
+	camino=otro.camino;
+	dic=otro.dic;
+}
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+bool dicA<K,T>::Iterador::HaySiguiente(){
+	return siguiente!=NULL;
+}
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+K dicA<K,T>::Iterador::SiguienteClave(){
+	return siguiente->clave;
+}
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+T& dicA<K,T>::Iterador::SiguienteSignificado(){
+	return *(siguiente->significado);
+}
+///////////////////////////////////////////////////////////
+template<typename K, typename T>
+void dicA<K,T>::Iterador::Avanzar(){
+	if(!(camino.EsVacia())){
+		siguiente = &camino.tope();
+		camino.desapilar();
+		apilarHijos(siguiente, camino);
+	}
+	else siguiente=NULL;
 }
 
 #endif

@@ -19,38 +19,49 @@ void devolverBool(bool b){
 
 int main(){
 	dicA<string, int> edades;
-	int eyo=20;
+	int emia=20;
 	int echaro=20;
 	int elucia=20;
-	edades.definir("gregorio", eyo);	
+	edades.definir("gregorio", emia);	
 	edades.definir("charo", echaro);
 	edades.definir("turra", elucia); 
-	edades.definir("brian", eyo);
-	edades.definir("dante", eyo);
+	edades.definir("brian", emia);
+	edades.definir("dante", emia);
 	assert(1==edades.definido("gregorio"));
 	assert(1==edades.definido("charo"));
 	assert(1==edades.definido("turra")); 
 	assert(0==edades.definido("tuvieja")); // funciona defindio
-	//edades.definir("brian", eyo);
-	//edades.definir("dante", eyo);
-	cout<< "los nodos hasta ahroa son : "<<endl;
-	edades.mostrarNodos();
+	//edades.definir("brian", emia);
+	//edades.definir("dante", emia);
 	edades.borrar("gregorio");
 	edades.borrar("brian");
 	edades.borrar("charo");
 	edades.borrar("dante");
 	edades.borrar("turra");
 	cout << "\nHago borrado: "<<endl;
-	edades.mostrarNodos();
-	//edades.borrar("brian");
-	//
-	//edades.borrar("turra");
-	//edades.borrar("dante");
+	//funciona borrar bien
 
+	cout << "Segun claves, las claves son : "<<endl;
+	edades.definir("gregorio", emia);	
+	edades.definir("charo", echaro);
+	edades.definir("turra", elucia); 
+	edades.definir("brian", emia);
+	edades.definir("dante", emia);
+
+	Conj<string> cla = edades.claves();
+	typename Conj<string>::Iterador it= cla.CrearIt();
+	while(it.HaySiguiente()){
+		cout << it.Siguiente()<< endl;
+		it.Avanzar();
+	}
+
+	cout << "\n y segun el iterador de diccioanrio son: "<<endl;
+	typename dicA<string, int>::Iterador itDic = edades.CrearIt();
+	while(itDic.HaySiguiente()){
+		cout << itDic.SiguienteClave()<< endl;
+		itDic.Avanzar();
+	}
 	
-
-	//edades.borrar("charo");
-
 
 	return 0;
 }	

@@ -296,7 +296,6 @@ aed2::Conj<string> dicT<T>::claves() {
 ///////////////////////////////////////////////////////////
 template <typename T>
 bool dicT<T>::operator ==(dicT<T> &otro) {
-	bool res;
 	Conj<string> clavesOtro= otro.claves();
 	typename Conj<string>::Iterador it = clavesOtro.CrearIt();
 	while(it.HaySiguiente()){
