@@ -37,7 +37,7 @@ public:
 	///////////////////////////
 	T& obtener(K clave);  //definida
 	///////////////////////////
-	void borrar(K clave);  //definida
+	void borrar(K clave);  //definida  FALTTA CASO QUE BORRES LA RAIZ;
 	///////////////////////////
 	aed2::Conj<K> claves();  //definida
 	///////////////////////////
@@ -49,7 +49,7 @@ public:
 	///////////////////////////
 	string Maximo(); 		//definida
 	///////////////////////////
-
+	void mostrarNodos();
 	class Iterador{
 	public:
 		Iterador();
@@ -79,6 +79,96 @@ private:
 		if(n->izq!=NULL) destruir(n->izq);
 		if(n!=NULL)delete(n);
 	}
+	//////////////////////
+	void dameNodo(Nodo*& actual, K c){
+		while(actual->clave != c){
+			if(c > actual->clave) actual = actual->der;
+			else actual=actual->izq;
+		}
+	}
+
+	bool esHoja(Nodo* n){
+		return( n->izq==NULL && n->der==NULL);
+	}
+
+	bool tieneUnHijo(Nodo* n){
+		bool res = (n->izq==NULL && n->der!=NULL);
+		res= (res || (n->izq!=NULL && n->der ==NULL));
+		return res;
+	}
+	bool tieneDosHijos(Nodo* n){
+		return (n->izq != NULL && n->der != NULL);
+	}
+	// pre: que tenga padre;
+	bool esHijoDer(Nodo* n){
+		return (n->clave > n->padre->clave);
+	}
+	Nodo* predecesorInmediato(Nodo* n){
+		Nodo* res=n->izq;
+		while(res->der!=NULL){
+			res=res->der;
+		}
+		return res;
+	}
+	
+	void borrarRaiz(Nodo*& n){
+		if(esHoja(n)) {
+			delete(n);
+			raiz=NULL;
+		}
+		else if(tieneUnHijo(n)){
+			if(n->izq!=NULL)raiz=n->izq;
+			else raiz=n->der;
+			delete(n);
+			raiz->padre=NULL;
+		}
+		else{
+	
+		Nodo* predecesor = predecesorInmediato(n);
+		n->clave=predecesor->clave;
+		n->significado=predecesor->significado;
+		Nodo* padre=predecesor->padre;
+		if(esHoja(predecesor)){
+			if(esHijoDer(predecesor)) padre->der=NULL;
+			else padre->izq=NULL;
+			delete(predecesor);
+		}
+		else if(tieneUnHijo(predecesor)){
+			if(esHijoDer(predecesor)){
+				if(predecesor->der!=NULL){
+					padre->der=predecesor->der;
+					predecesor->der->padre= padre;	
+				}
+				else {
+					padre->der = predecesor->izq;
+					predecesor->izq->padre=padre;
+				}
+				delete(predecesor);
+			}
+			else{
+				if(predecesor->der!=NULL){
+					padre->izq=predecesor->der;
+
+					predecesor->der->padre= padre;	
+				}
+				else {
+					padre->izq = predecesor->izq;
+					predecesor->izq->padre=padre;
+				}
+				delete(predecesor);
+
+			}
+		}
+	}
+}
+
+	void mostrarNodosAux(Nodo* n){
+		cout << n->clave << endl;
+		if(n->izq!=NULL) mostrarNodosAux(n->izq);
+		if(n->der!=NULL) mostrarNodosAux(n->der);
+	}
+
+
 };
 template<typename K, typename T>
 dicA<K,T>::dicA(): raiz(NULL)
@@ -125,6 +215,7 @@ bool dicA<K, T>::definido(K c) const{
 			actual = actual->izq;
 		}
 	}
+	return false;
 }
 
 template<typename K, typename T>
@@ -134,7 +225,90 @@ T& dicA<K,T>::obtener(K c){
 		if(actual->clave < c) actual=actual->der;
 		else actual=actual->izq;
 	}
-	return actual->significado;
+	return *(actual->significado);
+}
+
+template<typename K, typename T>
+void dicA<K,T>::borrar(K c){
+	Nodo* actual= raiz;
+	dameNodo(actual, c);
+	Nodo* padre = actual->padre;
+	
+	if(actual==raiz) borrarRaiz(actual);
+
+	else if(esHoja(actual)){
+		if(esHijoDer(actual)) padre->der=NULL;
+		else padre->izq=NULL;
+		delete(actual);
+	}
+	else if(tieneUnHijo(actual)){
+		if(esHijoDer(actual)){
+			if(actual->der!=NULL){
+				padre->der=actual->der;
+				actual->der->padre= padre;	
+			}
+			else {
+				padre->der = actual->izq;
+				actual->izq->padre=padre;
+			}
+			delete(actual);
+		}
+		else{
+			if(actual->der!=NULL){
+				padre->izq=actual->der;
+
+				actual->der->padre= padre;	
+			}
+			else {
+				padre->izq = actual->izq;
+				actual->izq->padre=padre;
+			}
+			delete(actual);
+
+		}
+	}
+	else{
+		Nodo* predecesor = predecesorInmediato(actual);
+		actual->clave=predecesor->clave;
+		actual->significado=predecesor->significado;
+		padre=predecesor->padre;
+		if(esHoja(predecesor)){
+			if(esHijoDer(predecesor)) padre->der=NULL;
+			else padre->izq=NULL;
+			delete(predecesor);
+		}
+		else if(tieneUnHijo(predecesor)){
+			if(esHijoDer(predecesor)){
+				if(predecesor->der!=NULL){
+					padre->der=predecesor->der;
+					predecesor->der->padre= padre;	
+				}
+				else {
+					padre->der = predecesor->izq;
+					predecesor->izq->padre=padre;
+				}
+				delete(predecesor);
+			}
+			else{
+				if(predecesor->der!=NULL){
+					padre->izq=predecesor->der;
+
+					predecesor->der->padre= padre;	
+				}
+				else {
+					padre->izq = predecesor->izq;
+					predecesor->izq->padre=padre;
+				}
+				delete(predecesor);
+
+			}
+		}
+	}
+}
+
+template<typename K, typename T>
+void dicA<K,T>::mostrarNodos(){
+	mostrarNodosAux(raiz);
 }
 
 #endif
